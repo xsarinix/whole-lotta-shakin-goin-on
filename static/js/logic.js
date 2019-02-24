@@ -1,6 +1,6 @@
 var myMap = L.map("map", {
-    center: [37.0902, -95.7129],
-    zoom: 3
+    center: [37.0902, -130.7129],
+    zoom: 4
 });
 
 L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
@@ -18,14 +18,50 @@ d3.json(all_url, function(response) {
     var features = response.features;
     features.forEach((quake,i) => {
         console.log(`${i}: ${quake.properties.title}, ${quake.geometry.coordinates}`)
-        var radius = quake.properties.mag * 10000;
+        if (quake.properties.mag > 4.5) {
+            color = "#ff0000"
+        }
+        else if (quake.properties.mag > 3.5) {
+            color = "#ff9900"
+        }
+        else if (quake.properties.mag > 2.5) {
+            color = "#ffff00"
+        }
+        else {
+            color = "#ffffb2"
+        }
         var format = {
-            color: "red",
-            fillColor: "red",
+            color: color,
+            fillColor: color,
             fillOpacity: "0.5",
-            radius: radius
+            weight: "1",
+            radius: quake.properties.mag *10000
         }
         L.circle([quake.geometry.coordinates[1],quake.geometry.coordinates[0]], format)
             .addTo(myMap);
     });
+
+    // Set up the legend
+    var legend = L.control({ position: "bottomright" });
+    legend.onAdd = function() {
+    var div = L.DomUtil.create("div", "info legend");
+    var limits = ["<2.5", "2.5-3.5", "3.5-4.5", ">4.5"];
+    var colors = ["#ffffb2", "#ffff00", "#ff9900", "#ff0000"];
+    var labels = [];
+
+    // Add min & max
+    var legendInfo = "<h1>Magnitude</h1>"
+    div.innerHTML = legendInfo;
+
+    limits.forEach(function(limit, index) {
+      labels.push("<li style=\"background-color: " + colors[index] + "\">"+limit+"</li>");
+    });
+
+    div.innerHTML += "<ul>" + labels.join("") + "</ul>";
+    return div;
+    };
+
+    // Adding legend to the map
+    legend.addTo(myMap);
+
 });
