@@ -17,27 +17,33 @@ var all_url="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month
 d3.json(all_url, function(response) {
     var features = response.features;
     features.forEach((quake,i) => {
-        console.log(`${i}: ${quake.properties.title}, ${quake.geometry.coordinates}`)
+        var ts = new Date(quake.properties.time)
+        console.log(`${i}: Magnitude ${quake.properties.mag}`)
         if (quake.properties.mag > 4.5) {
             color = "#ff0000"
+            radius = quake.properties.mag * 15000
         }
         else if (quake.properties.mag > 3.5) {
             color = "#ff9900"
+            radius = quake.properties.mag * 10000
         }
         else if (quake.properties.mag > 2.5) {
             color = "#ffff00"
+            radius = quake.properties.mag * 7500
         }
         else {
             color = "#ffffb2"
+            radius = quake.properties.mag * 5000
         }
         var format = {
             color: color,
             fillColor: color,
             fillOpacity: "0.5",
             weight: "1",
-            radius: quake.properties.mag *10000
+            radius: radius
         }
         L.circle([quake.geometry.coordinates[1],quake.geometry.coordinates[0]], format)
+            .bindPopup(`${ts}: ${quake.properties.title}`)
             .addTo(myMap);
     });
 
@@ -57,7 +63,7 @@ d3.json(all_url, function(response) {
       labels.push("<li style=\"background-color: " + colors[index] + "\">"+limit+"</li>");
     });
 
-    div.innerHTML += "<ul>" + labels.join("") + "</ul>";
+    div.innerHTML += "<ul class=\"list-unstyled\">" + labels.join("") + "</ul>";
     return div;
     };
 
