@@ -84,10 +84,16 @@ var overlayMaps = {
     "Tectonic Plates": plateLayer
 }
 
+var corner1 = [90, -180];
+var corner2 = [-90, 180];
+bounds = L.latLngBounds(corner1, corner2);
+
 var myMap = L.map("map", {
     center: [37, -100],
     zoom: 4,
-    layers: [OpenMapSurfer_Roads, quakeMarkers]
+    layers: [OpenMapSurfer_Roads, quakeMarkers],
+    maxBounds: bounds,
+    // maxBoundsViscosity: 1.0
 });
 
 // Set up the legend
