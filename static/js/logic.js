@@ -1,14 +1,14 @@
-
-var m45_url="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_month.geojson";
-var all_url="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson";
+var platesURL="https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_plates.json"
+var m45QuakesURL="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_month.geojson";
+var allQuakesURL="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson";
 
 var quakeMarkers = L.layerGroup();
 
-d3.json(all_url, function(response) {
+d3.json(allQuakesURL, function(response) {
     var features = response.features;
+    console.log(features);
     features.forEach((quake,i) => {
         var ts = new Date(quake.properties.time)
-        // console.log(`${i}: Magnitude ${quake.properties.mag}`)
         if (quake.properties.mag > 4.5) {
             color = "#ff0000"
             radius = quake.properties.mag * 15000
@@ -32,32 +32,62 @@ d3.json(all_url, function(response) {
             weight: "1",
             radius: radius
         }
-        
         quakeMarkers.addLayer(L.circle([quake.geometry.coordinates[1],quake.geometry.coordinates[0]], format)
             .bindPopup(`${ts}: ${quake.properties.title}`)
         );
     });
 });
 
-var streets = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
-    attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
-    maxZoom: 18,
-    id: "mapbox.streets",
-    accessToken: API_KEY
+var plateLayer = L.layerGroup();
+
+d3.json(platesURL, function(data) {
+    console.log(data);
+    plateLayer.addLayer(L.geoJSON(data, {
+        style: {
+            color: "white",
+            weight: 1.5
+        },
+        onEachFeature: function(feature, layer) {
+            layer.bindPopup(`Plate: ${feature.properties.PlateName}`)
+        }
+    }));
+});
+
+var OpenMapSurfer_Roads = L.tileLayer('https://maps.heigit.org/openmapsurfer/tiles/roads/webmercator/{z}/{x}/{y}.png', {
+	maxZoom: 19,
+	attribution: 'Imagery from <a href="http://giscience.uni-hd.de/">GIScience Research Group @ University of Heidelberg</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+});
+
+var OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+	maxZoom: 17,
+	attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+});
+
+var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+});
+
+var OpenStreetMap_BlackAndWhite = L.tileLayer('https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', {
+	maxZoom: 18,
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 });
 
 var baseMaps = {
-    "Street View": streets,
+    "Traditional": OpenMapSurfer_Roads,
+    "Topographical": OpenTopoMap,
+    "Satellite": Esri_WorldImagery,
+    "Greyscale": OpenStreetMap_BlackAndWhite
 }
 
 var overlayMaps = {
-    "Earthquakes": quakeMarkers
+    "Earthquakes": quakeMarkers,
+    "Tectonic Plates": plateLayer
 }
 
 var myMap = L.map("map", {
-    center: [37.0902, -130.7129],
+    center: [37, -100],
     zoom: 4,
-    layers: [streets, quakeMarkers]
+    layers: [OpenMapSurfer_Roads, quakeMarkers]
 });
 
 // Set up the legend
