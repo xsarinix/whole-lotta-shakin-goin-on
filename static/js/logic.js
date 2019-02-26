@@ -54,7 +54,7 @@ d3.json(platesURL, function(data) {
 });
 
 var OpenMapSurfer_Roads = L.tileLayer('https://maps.heigit.org/openmapsurfer/tiles/roads/webmercator/{z}/{x}/{y}.png', {
-	maxZoom: 19,
+	maxZoom: 17,
 	attribution: 'Imagery from <a href="http://giscience.uni-hd.de/">GIScience Research Group @ University of Heidelberg</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 });
 
@@ -64,11 +64,12 @@ var OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
 });
 
 var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    maxZoom: 17,
 });
 
 var OpenStreetMap_BlackAndWhite = L.tileLayer('https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', {
-	maxZoom: 18,
+	maxZoom: 17,
 	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 });
 
@@ -91,9 +92,14 @@ bounds = L.latLngBounds(corner1, corner2);
 var myMap = L.map("map", {
     center: [37, -100],
     zoom: 4,
+    minZoom: 2,
+    maxZoom: 17,
     layers: [OpenMapSurfer_Roads, quakeMarkers],
     maxBounds: bounds,
-    // maxBoundsViscosity: 1.0
+    maxBoundsViscosity: 1.0,
+    noWrap: false,
+    bounceAtZoomLimits: true
+    // worldCopyJump: true
 });
 
 // Set up the legend
